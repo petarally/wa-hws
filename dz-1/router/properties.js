@@ -3,9 +3,6 @@ import nekretnine from "../nekretnine_data.js";
 
 const router = express.Router();
 
-// Funkcija provjere
-function provjera(varijabla) {}
-
 // Sve nekretnine
 router.get("/", (req, res) => {
   res.status(200).json(nekretnine);
