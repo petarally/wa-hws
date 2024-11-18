@@ -99,52 +99,27 @@
 
               <fieldset aria-label="Choose a color" class="mt-4">
                 <div class="flex items-center space-x-3">
-                  <!-- Active and Checked: "ring ring-offset-1" -->
                   <label
-                    aria-label="White"
+                    v-for="boja in proizvod.dostupne_boje"
+                    :key="boja"
+                    :aria-label="boja"
                     class="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none"
                   >
                     <input
                       type="radio"
                       name="color-choice"
-                      value="White"
+                      :value="boja"
                       class="sr-only"
                     />
                     <span
+                      :class="{
+                        'h-8 w-8 rounded-full border border-black border-opacity-10': true,
+                        'bg-white': boja === 'bijela',
+                        'bg-gray-200': boja === 'siva',
+                        'bg-gray-900': boja === 'crna',
+                        'bg-blue-200': boja === 'plava',
+                      }"
                       aria-hidden="true"
-                      class="h-8 w-8 rounded-full border border-black border-opacity-10 bg-white"
-                    ></span>
-                  </label>
-                  <!-- Active and Checked: "ring ring-offset-1" -->
-                  <label
-                    aria-label="Gray"
-                    class="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none"
-                  >
-                    <input
-                      type="radio"
-                      name="color-choice"
-                      value="Gray"
-                      class="sr-only"
-                    />
-                    <span
-                      aria-hidden="true"
-                      class="h-8 w-8 rounded-full border border-black border-opacity-10 bg-gray-200"
-                    ></span>
-                  </label>
-                  <!-- Active and Checked: "ring ring-offset-1" -->
-                  <label
-                    aria-label="Black"
-                    class="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-900 focus:outline-none"
-                  >
-                    <input
-                      type="radio"
-                      name="color-choice"
-                      value="Black"
-                      class="sr-only"
-                    />
-                    <span
-                      aria-hidden="true"
-                      class="h-8 w-8 rounded-full border border-black border-opacity-10 bg-gray-900"
                     ></span>
                   </label>
                 </div>
@@ -213,28 +188,12 @@ Checked: "border-indigo-500", Not Checked: "border-transparent"
 
             <div class="mt-4">
               <ul role="list" class="list-disc space-y-2 pl-4 text-sm">
-                <li class="text-gray-400">
-                  <span class="text-gray-600"
-                    >Sed ut perspiciatis unde omnis iste natus error sit
-                    voluptatem accusantium</span
-                  >
-                </li>
-                <li class="text-gray-400">
-                  <span class="text-gray-600"
-                    >doloremque laudantium, totam rem aperiam, eaque ipsa quae
-                    ab illo inventore veritatis et quasi architecto</span
-                  >
-                </li>
-                <li class="text-gray-400">
-                  <span class="text-gray-600"
-                    >beatae vitae dicta sunt explicabo</span
-                  >
-                </li>
-                <li class="text-gray-400">
-                  <span class="text-gray-600"
-                    >Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
-                    odit aut fugit</span
-                  >
+                <li
+                  v-for="karakteristika in proizvod.karakteristike"
+                  :key="karakteristika"
+                  class="text-gray-400"
+                >
+                  <span class="text-gray-600">{{ karakteristika }}</span>
                 </li>
               </ul>
             </div>
@@ -259,6 +218,7 @@ Checked: "border-indigo-500", Not Checked: "border-transparent"
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import { useRouter, useRoute } from "vue-router";
 
 let proizvod = ref({
   id: 0,
@@ -267,12 +227,18 @@ let proizvod = ref({
   velicine: [],
   opis: "",
   slike: [],
+  dostupne_boje: [],
+  karakteristike: [],
 });
+
+const route = useRoute();
+const router = useRouter();
 
 // asinkroni callback (hook)
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:3000/proizvodi/1");
+    const id = route.params.id;
+    const response = await axios.get(`http://localhost:3000/proizvodi/${id}`);
     proizvod.value = response.data; // postavljanje podataka u reaktivnu varijablu
   } catch (error) {
     console.error("Greška u dohvatu podataka: ", error);
@@ -280,15 +246,9 @@ onMounted(async () => {
 });
 
 const posaljiNarudzbu = async () => {
-  try {
-    let response = await axios.post(
-      "http://localhost:3000/narudzbe",
-      podaci.value
-    ); //
-    axios.post(url, data);
-    console.log(response);
-  } catch (error) {
-    console.error("Greška u dohvatu podataka: ", error);
-  }
+  let kosarica = JSON.parse(localStorage.getItem("kosarica")) || [];
+  kosarica.push(proizvod.value);
+  localStorage.setItem("kosarica", JSON.stringify(kosarica));
+  router.push("/proizvodi");
 };
 </script>

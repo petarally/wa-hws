@@ -1,9 +1,10 @@
 <template>
   <div>
-    <!-- Uključujemo komponentu -->
-    <ProductView />
+    <nav>
+      <router-link to="/proizvodi"></router-link>
+    </nav>
+    <router-view></router-view>
   </div>
 </template>
-<script setup>
-import ProductView from "./components/Proizvod.vue";
-</script>
+
+<script setup></script>
