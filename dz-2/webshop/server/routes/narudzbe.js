@@ -17,6 +17,7 @@ class Narudzba {
     return ukupno;
   }
 }
+
 // dummy narudžba
 const narudzba = new Narudzba(1, [
   { id: 1, velicina: "M", narucena_kolicina: 2 },
@@ -34,7 +35,7 @@ router.post("/", (req, res) => {
   let latest_id = narudzbe.length ? narudzbe.at(-1).id + 1 : 1;
   let narudzba_obj = new Narudzba(latest_id, naruceni_proizvodi);
   narudzbe.push(narudzba_obj);
-  return res.status(201).json(podaci);
+  return res.status(201).json(narudzba_obj);
 });
 
 export default router;
