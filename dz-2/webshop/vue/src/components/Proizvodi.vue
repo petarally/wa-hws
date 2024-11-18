@@ -65,8 +65,11 @@ export default {
     },
     naruciProizvode() {
       const kosarica = JSON.parse(localStorage.getItem("kosarica")) || [];
+      console.log(kosarica);
       axios
-        .post("http://localhost:3000/narudzbe", kosarica)
+        .post("http://localhost:3000/narudzbe", {
+          naruceni_proizvodi: kosarica,
+        })
         .then((response) => {
           console.log("Narudžba uspješna:", response.data);
           localStorage.removeItem("kosarica");

@@ -109,6 +109,7 @@
                       type="radio"
                       name="color-choice"
                       :value="boja"
+                      v-model="selectedColor"
                       class="sr-only"
                     />
                     <span
@@ -118,6 +119,7 @@
                         'bg-gray-200': boja === 'siva',
                         'bg-gray-900': boja === 'crna',
                         'bg-blue-200': boja === 'plava',
+                        'ring-2 ring-indigo-500': selectedColor === boja,
                       }"
                       aria-hidden="true"
                     ></span>
@@ -134,35 +136,32 @@
 
               <fieldset aria-label="Choose a size" class="mt-4">
                 <div v-for="velicina in proizvod.velicine" :key="velicina">
-                  <!-- v-for direktiva za iscrtavanje veličina -->
                   <label
-                    class="group relative flex cursor-pointer items-center justify-center rounded-md border bg-white px-4 py-3 text-sm font-medium uppercase text-gray-900 shadow-sm hover:bg- gray-50 focus:outline-none sm:flex-1 sm:py-6"
+                    class="group relative flex cursor-pointer items-center justify-center rounded-md border bg-white px-4 py-3 text-sm font-medium uppercase text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6"
+                    :class="{
+                      'ring-2 ring-indigo-500': selectedSize === velicina,
+                    }"
                   >
                     <input
                       type="radio"
                       name="size-choice"
-                      value="_"
+                      :value="velicina"
+                      v-model="selectedSize"
                       class="sr-only"
                     />
                     <span>{{ velicina }}</span>
-                    <!--
-Active: "border", Not Active: "border-2"
-Checked: "border-indigo-500", Not Checked: "border-transparent"
--->
                     <span
                       class="pointer-events-none absolute -inset-px rounded-md"
                       aria-hidden="true"
-                    >
-                    </span>
+                    ></span>
                   </label>
-                  <!-- Active: "ring-2 ring-indigo-500" -->
                 </div>
               </fieldset>
             </div>
             <button
-              type="submit"
-              @click="posaljiNarudzbu"
-              class="mt-10 flex w-full items-center justify-center rounded-md border border- transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              type="button"
+              @click="dodajUKosaricu"
+              class="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
               Dodaj u košaricu
             </button>
@@ -218,7 +217,7 @@ Checked: "border-indigo-500", Not Checked: "border-transparent"
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 let proizvod = ref({
   id: 0,
@@ -231,23 +230,34 @@ let proizvod = ref({
   karakteristike: [],
 });
 
+const selectedColor = ref("");
+const selectedSize = ref("");
+
 const route = useRoute();
 const router = useRouter();
 
-// asinkroni callback (hook)
 onMounted(async () => {
   try {
     const id = route.params.id;
     const response = await axios.get(`http://localhost:3000/proizvodi/${id}`);
-    proizvod.value = response.data; // postavljanje podataka u reaktivnu varijablu
+    proizvod.value = response.data;
   } catch (error) {
     console.error("Greška u dohvatu podataka: ", error);
   }
 });
 
-const posaljiNarudzbu = async () => {
+const dodajUKosaricu = () => {
+  if (!selectedColor.value || !selectedSize.value) {
+    alert("Molimo odaberite boju i veličinu.");
+    return;
+  }
+
   let kosarica = JSON.parse(localStorage.getItem("kosarica")) || [];
-  kosarica.push(proizvod.value);
+  kosarica.push({
+    ...proizvod.value,
+    selectedColor: selectedColor.value,
+    selectedSize: selectedSize.value,
+  });
   localStorage.setItem("kosarica", JSON.stringify(kosarica));
   router.push("/proizvodi");
 };
